@@ -16,13 +16,7 @@ end
 
 wget.callbacks.lookup_host = function(host)
   if host == "canv.as" or host == "www.canv.as" then
-    -- FIXME: i don't know why wget keeps saying wget-lua: unable to resolve host address 'canv.as'
-    
-    local table = {'54.231.14.172', '176.32.101.156', '176.32.99.220', '205.251.243.76', '54.240.235.193', '176.32.102.92'}
-    local ip = table[ math.random( #table ) ]
-    io.stdout:write("IP" .. ip .. "\n")
-    io.stdout:flush()
-    return ip
+    return 'drawquest-export.s3-website-us-east-1.amazonaws.com'
   end
 end
 
@@ -43,8 +37,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
   local status_code = http_stat["statcode"]
 
   url_count = url_count + 1
-  io.stdout:write(url_count .. "=" .. status_code .. " " .. url["url"] .. ".  \n")
---  io.stdout:write(url_count .. "=" .. status_code .. " " .. url["url"] .. ".  \r")
+  io.stdout:write(url_count .. "=" .. status_code .. " " .. url["url"] .. ".  \r")
   io.stdout:flush()
 
   if status_code >= 500 or
@@ -87,18 +80,26 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
   local urls = {}
   local html = read_file(file)
 
-  for url in string.gfind(html, "url%(([^%)]+)%)") do
-    -- ignore things like " + original + " which is javascript
-    if not string.match(url, " %+") then
-      io.stdout:write("\n  Added " .. url .. ".\n")
-      io.stdout:flush()
-      table.insert(urls, { url=url })
+  for url in string.gfind(html, "url%(([%w/%%.:_-]+)%)") do
+
+    -- prevent segfault of missing full url
+    if url:sub(1, 4) ~= 'http' then
+      if url:sub(1, 1) ~= '/' then
+        url = '/' .. url
+      end
+
+      url = 'http://canv.as' .. url
     end
+
+--    io.stdout:write("\n  Added " .. url .. ".\n")
+--    io.stdout:flush()
+
+    table.insert(urls, { url=url })
   end
 
-  for url in string.gfind(html, "'(http[^']+)'") do
-    io.stdout:write("\n  Added " .. url .. ".\n")
-    io.stdout:flush()
+  for url in string.gfind(html, "'(http[%w/%%.:_-]+)'") do
+--    io.stdout:write("\n  Added " .. url .. ".\n")
+--    io.stdout:flush()
     table.insert(urls, { url=url })
   end
 
