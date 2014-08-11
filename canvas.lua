@@ -80,7 +80,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
   local urls = {}
   local html = read_file(file)
 
-  for url in string.gfind(html, "url%(([%w/%%.:_-]+)%)") do
+  for url in string.gmatch(html, "url%(([%w/%%.:_-]+)%)") do
 
     -- prevent segfault of missing full url
     if url:sub(1, 4) ~= 'http' then
@@ -97,7 +97,7 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
     table.insert(urls, { url=url })
   end
 
-  for url in string.gfind(html, "'(http[%w/%%.:_-]+)'") do
+  for url in string.gmatch(html, "'(http[%w/%%.:_-]+)'") do
 --    io.stdout:write("\n  Added " .. url .. ".\n")
 --    io.stdout:flush()
     table.insert(urls, { url=url })
