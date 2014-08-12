@@ -45,14 +45,16 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     io.stdout:write("\nServer returned "..http_stat.statcode..". Sleeping.\n")
     io.stdout:flush()
 
-    os.execute("sleep 10")
+--    os.execute("sleep 10")
+    os.execute("sleep 1")
 
     tries = tries + 1
 
     if tries >= 5 then
       io.stdout:write("\nI give up...\n")
       io.stdout:flush()
-      return wget.actions.ABORT
+--      return wget.actions.ABORT
+      return wget.actions.FINISH
     else
       return wget.actions.CONTINUE
     end
@@ -92,15 +94,15 @@ wget.callbacks.get_urls = function(file, url, is_css, iri)
       url = 'http://canv.as' .. url
     end
 
---    io.stdout:write("\n  Added " .. url .. ".\n")
---    io.stdout:flush()
+    --    io.stdout:write("\n  Added " .. url .. ".\n")
+    --    io.stdout:flush()
 
     table.insert(urls, { url=url })
   end
 
   for url in string.gmatch(html, "'(http[%w/%%.:_-]+)'") do
---    io.stdout:write("\n  Added " .. url .. ".\n")
---    io.stdout:flush()
+    --    io.stdout:write("\n  Added " .. url .. ".\n")
+    --    io.stdout:flush()
     table.insert(urls, { url=url })
   end
 
