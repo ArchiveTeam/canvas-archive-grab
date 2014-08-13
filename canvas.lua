@@ -1,5 +1,7 @@
 local url_count = 0
 local tries = 0
+local item_type = os.getenv('item_type')
+local item_value = os.getenv('item_value')
 
 
 read_file = function(file)
@@ -21,14 +23,22 @@ wget.callbacks.lookup_host = function(host)
 end
 
 --
---wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_parsed, iri, verdict, reason)
---  if urlpos["link_inline_p"] then
---    -- always download the page requisites
---    return true
---  end
---
---  return verdict
---end
+wget.callbacks.download_child_p = function(urlpos, parent, depth, start_url_parsed, iri, verdict, reason)
+  --  if urlpos["link_inline_p"] then
+  --    -- always download the page requisites
+  --    return true
+  --  end
+
+  if item_type == 'user' and item_value == 'Questbot' and string.match(urlpos["url"]["url"], '%.png$')then
+    if not string.match(urlpos["url"]["url"], '/[qQ]uestbot/') then
+--      io.stdout:write("Skip "..urlpos["url"]["url"].."\n")
+--      io.stdout:flush()
+      return false
+    end
+  end
+
+  return verdict
+end
 
 
 wget.callbacks.httploop_result = function(url, err, http_stat)
@@ -45,7 +55,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     io.stdout:write("\nServer returned "..http_stat.statcode..". Sleeping.\n")
     io.stdout:flush()
 
---    os.execute("sleep 10")
+    --    os.execute("sleep 10")
     os.execute("sleep 1")
 
     tries = tries + 1
@@ -53,7 +63,7 @@ wget.callbacks.httploop_result = function(url, err, http_stat)
     if tries >= 5 then
       io.stdout:write("\nI give up...\n")
       io.stdout:flush()
---      return wget.actions.ABORT
+      --      return wget.actions.ABORT
       return wget.actions.FINISH
     else
       return wget.actions.CONTINUE
